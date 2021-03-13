@@ -1,0 +1,37 @@
+version: "3.8"
+
+services:
+  ######################################################################################
+  ######################################################################################
+  ######################################################################################
+  app:
+    build:
+      context: .
+    # image: localhost:5000/pen-testing:${VERSION:-latest}
+    image: mvladislav/pen-testing:${VERSION:-latest}
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        max_replicas_per_node: 1
+        constraints:
+          # - "node.id==${NODE_ID}"
+          - "node.role==${NODE_ROLE:-manager}"
+      restart_policy:
+        condition: on-failure
+    volumes:
+      # - root:/root
+      - ./log/:/tmp/logging/
+      - ./docs/:/tmp/docs/
+    networks:
+      default: {}
+    restart: always
+
+######################################################################################
+######################################################################################
+######################################################################################
+networks:
+  default:
+    driver: ${NETWORK_MODE:-bridge}
+# volumes:
+#   root: {}
