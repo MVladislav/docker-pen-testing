@@ -5,6 +5,12 @@
 - replay log files
   - `$scriptreplay <filename>.time <filename>.log`
 
+### relevant folders
+
+- `/root/toolkit`
+- `/root/wordlists`
+- `/pentest/`
+
 ## create `.env` file following:
 
 ```env
@@ -27,6 +33,8 @@ $sudo ip route add 192.168.0.0/16 dev eth0
 
 $sudo ip route add default dev eth1
 ```
+
+> TODO: test with `netplan`
 
 ```yml
 network:
