@@ -1,15 +1,22 @@
 # SETUP
 
+## run and log
+
 - run manually
   - `$docker run -v "$HOME/Pen_Test/log/:/tmp/logging/" -v "$HOME/Pen_Test/docs/:/tmp/docs/" -it mvladislav/pen-testing:latest /bin/zsh`
+  - description
+    - `"$HOME/Pen_Test/log/:/tmp/logging/"`
+      > docker will start with `script` where the logs will saved in the docker runtime under `/tmp/logging/`
+    - `"$HOME/Pen_Test/docs/:/tmp/docs/"`
+      > you can use this to transfer relevant files between docker runtime and host to save results from commands/services
 - replay log files
-  - `$scriptreplay <filename>.time <filename>.log`
+  - `$scriptreplay $HOME/Pen_Test/log/<filename>.time $HOME/Pen_Test/log/<filename>.log`
 
 ### relevant folders
 
 - `/root/toolkit`
 - `/root/wordlists`
-- `/pentest/`
+- `/pentest`
 
 ## create `.env` file following:
 
