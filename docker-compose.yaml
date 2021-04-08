@@ -7,7 +7,6 @@ services:
   app:
     build:
       context: .
-    # image: localhost:5000/pen-testing:${VERSION:-latest}
     image: mvladislav/pen-testing:${VERSION:-latest}
     deploy:
       mode: replicated
@@ -21,17 +20,16 @@ services:
         condition: on-failure
     volumes:
       # - root:/root
-      - ./log/:/tmp/logging/
-      - ./docs/:/tmp/docs/
+      - $HOME/DockerBackup/Pen_Test/log/:/tmp/logging/
+      - $HOME/DockerBackup/Pen_Test/docs/:/tmp/docs/
     networks:
       default: {}
-    restart: always
+    # restart: always
 
 ######################################################################################
 ######################################################################################
 ######################################################################################
+
 networks:
   default:
     driver: ${NETWORK_MODE:-bridge}
-# volumes:
-#   root: {}
