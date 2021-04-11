@@ -34,11 +34,16 @@ PORT=8080
 > route all internal addresses on internal interface to access internal services
 
 ```sh
+$sudo ip route flush table main
+$sudo ip route flush cached
 $sudo ip route add 10.0.0.0/8 dev eth0
 $sudo ip route add 172.16.0.0/16 dev eth0
 $sudo ip route add 192.168.0.0/16 dev eth0
 
 $sudo ip route add default dev eth1
+
+$sudo ip route flush table main
+$sudo service network-manager restart
 ```
 
 > TODO: test with `netplan`
@@ -86,11 +91,27 @@ network:
 
 ```sh
 $find . -type f -name "*protonvpn*.ovpn" -exec bash -c "grep -q '^auth-user-pass' '{}' && sed -i 's/^auth-user-pass.*/auth-user-pass pass\.conf/' '{}' || echo 'auth-user-pass pass.conf' >> '{}'" \;
+$find . -type f -name "*protonvpn*udp*.ovpn" -exec bash -c 'nmcli connection import type openvpn file "{}"' \;
 $find . -type f -name "*priv_tunnel*.ovpn" -exec bash -c 'nmcli connection import type openvpn file "{}"' \;
 
 $nmcli connection show
 $nmcli connection up <vpn connection name>
 ```
+
+## Info
+
+1. Passive Information Gathering
+1. Active Information Gathering
+1. Vulnerability Scanning
+1. Web Application Attacks
+1. Introduction to Buffer Overflows
+1. Windows Buffer Overflows
+1. Linux Buffer Overflows
+1. Client-Side Attacks
+1. Locating Public Exploits
+1. Fixing Exploits
+1. File Transfers
+1. Antivirus Evasion
 
 ## References
 
