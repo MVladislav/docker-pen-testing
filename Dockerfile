@@ -1,6 +1,15 @@
-FROM ubuntu:20.04
+# FROM ubuntu:20.04
+FROM ghcr.io/linuxserver/baseimage-ubuntu:bionic
 
-# LABEL maintainer=""
+# set version label
+ARG BUILD_DATE
+ARG VERSION
+LABEL build_version="MVladislav version:- ${VERSION} Build-date:- ${BUILD_DATE}"
+LABEL maintainer="MVladislav"
+
+#############################
+# DEFAULTS
+#############################
 
 # Environment Variables
 ENV HOME /root
@@ -8,11 +17,25 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # Working Directory
 WORKDIR /root
-RUN mkdir ${HOME}/toolkit &&\
+RUN \
+  mkdir ${HOME}/toolkit &&\
   mkdir ${HOME}/wordlists
 
+#############################
+# INIT UPDATE/UPGRADE
+#############################
+
+# Update
+RUN \
+  apt-get update &&\
+  apt-get upgrade -y
+
+#############################
+# DEPENDENCIES
+#############################
+
 # Install Essentials
-RUN apt-get update &&\
+RUN \
   apt-get install -y --no-install-recommends \
   build-essential \
   tmux \
@@ -30,91 +53,112 @@ RUN apt-get update &&\
   whois \
   python3 \
   python3-pip \
-  perl \
+  # perl-base \
   nikto \
   dnsutils \
   net-tools \
-  zsh\
-  nano\
-  lsb-release\
-  jq\
-  packer\
-  # doctl\
-  rsync\
-  fzf\
-  libnotify-bin\
-  unzip\
-  && rm -rf /var/lib/apt/lists/*
+  zsh \
+  nano \
+  lsb-release \
+  jq \
+  packer \
+  # doctl \
+  rsync \
+  libnotify-bin \
+  unzip \
+  # for killall
+  psmisc
 
-# Install Dependencies
-RUN apt-get update &&\
+# Install Extra Essentials
+RUN \
   apt-get install -y --no-install-recommends \
   sqlmap \
   dirb \
   cpanminus \
-  python-pycurl \
-  python-dnspython \
   libldns-dev \
   libcurl4-openssl-dev \
   libxml2 \
   libxml2-dev \
   libxslt1-dev \
+  python3-setuptools \
+  python3-protobuf \
+  python3-requests \
+  python3-numpy \
+  python3-serial \
+  python3-usb \
+  python3-dev \
+  python3-websockets \
+  python3-pycurl \
+  python3-dnspython \
   ruby-dev \
   libgmp-dev \
   zlib1g-dev \
   libpcap-dev \
-  python3 \
   libwww-perl \
   hydra \
   dnsrecon \
-  powerline\
-  fonts-powerline\
+  powerline \
+  fonts-powerline \
   # xsltproc for nmap to html
   xsltproc \
   # geo ip lookip "geoiplookup <ip>"
-  geoip-bin\
-  && rm -rf /var/lib/apt/lists/*
+  geoip-bin
 
-# # Install more tools
-# RUN apt-get update &&\
-#   apt-get install -y --no-install-recommends \
-#   dnsenum\
-#   wfuzz\
-#   knock\
-#   massdns\
-#   masscan\
-#   theharvester\
-#   joomscan\
-#   wpcscan\
-#   && rm -rf /var/lib/apt/lists/*
+
+# Install more Tools
+RUN \
+  apt-get install -y --no-install-recommends \
+  sqlmap
+# dnsenum \
+# wfuzz \
+# knock \
+# massdns \
+# masscan \
+# theharvester \
+# joomscan \
+# wpcscan
+
+#############################
+# ...
+#############################
 
 # tzdata
 RUN ln -fs /usr/share/zoneinfo/Europe/Berlin /etc/localtime &&\
   dpkg-reconfigure --frontend noninteractive tzdata
 
-# configure python(s)
-RUN python3 -m pip install --upgrade setuptools
-
 #############################
 # LEGACY
 #############################
 
+
+RUN \
+  apt-get install -y --no-install-recommends \
+  python2.7 \
+  python2.7-dev
+
 # PIP 2.7
-RUN cd ${HOME}/toolkit &&\
+RUN \
+  cd ${HOME}/toolkit &&\
   curl https://bootstrap.pypa.io/pip/2.7/get-pip.py --output get-pip.py &&\
   /usr/bin/python2.7 get-pip.py &&\
   /usr/bin/python2.7 -m pip install --upgrade pip
+# update python2
+RUN pip install --upgrade setuptools
+RUN pip install --upgrade pip
 
 #############################
 # PIP PYTHON
 #############################
 
+# update python3
+# RUN pip3 install --upgrade setuptools
+# RUN pip3 install --upgrade pip
+
 # wfuzz
 RUN pip install wfuzz
 
 # s3recon
-RUN pip3 install --upgrade setuptools &&\
-  pip3 install pyyaml pymongo requests s3recon
+RUN pip3 install pyyaml pymongo requests s3recon
 
 # fierce
 RUN pip3 install fierce
@@ -151,24 +195,33 @@ RUN cd ${HOME}/toolkit &&\
 # GITHUB
 #############################
 
-# zsh
-RUN git clone https://github.com/robbyrussell/oh-my-zsh.git ~/.oh-my-zsh &&\
-  cp ~/.oh-my-zsh/templates/zshrc.zsh-template ~/.zshrc &&\
-  chsh -s /bin/zsh &&\
-  chsh -s /bin/zsh root &&\
-  git clone https://github.com/zsh-users/zsh-syntax-highlighting.git "$HOME/.zsh-syntax-highlighting" --depth 1 &&\
-  echo "source $HOME/.zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" >> "$HOME/.zshrc"
-
 # seclists
 RUN cd ${HOME}/wordlists &&\
   git clone --depth 1 https://github.com/danielmiessler/SecLists.git
 
+# zsh
+RUN \
+  git clone https://github.com/robbyrussell/oh-my-zsh.git ~/.oh-my-zsh &&\
+  cp ~/.oh-my-zsh/templates/zshrc.zsh-template ~/.zshrc &&\
+  chsh -s /bin/zsh &&\
+  chsh -s /bin/zsh root &&\
+  git clone https://github.com/denysdovhan/spaceship-prompt.git "$HOME/.oh-my-zsh/themes/spaceship.zsh-theme" --depth 1 &&\
+  git clone https://github.com/zsh-users/zsh-syntax-highlighting.git "$HOME/.zsh-syntax-highlighting" --depth 1
+# agnoster
+# spaceship
+RUN \
+  # echo "source $HOME/.zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" >> "$HOME/.zshrc" &&\
+  # grep -q '^ZSH_THEME=' "$HOME/.zshrc" && sed -i 's/^ZSH_THEME=.*/ZSH_THEME="spaceship"/' "$HOME/.zshrc" || echo 'ZSH_THEME="spaceship"' >> "$HOME/.zshrc" &&\
+  grep -q '^plugins=' "$HOME/.zshrc" && sed -i 's/^plugins=.*/plugins=\(git vscode ubuntu colored-man-pages command-not-found cp docker fd  gitignore history man nmap vim-interaction python pip docker-compose\)/' "$HOME/.zshrc" || echo 'plugins=(git vscode ubuntu colored-man-pages command-not-found cp docker fd  gitignore history man nmap vim-interaction python pip docker-compose)' >> "$HOME/.zshrc"
+
 # ..............................................................................
 
 # knock
+RUN pip3 install pyqt5==5.14.0
 RUN cd ${HOME}/toolkit &&\
   git clone https://github.com/guelfoweb/knock.git &&\
   cd knock &&\
+  pip3 install -r requirements.txt &&\
   chmod +x setup.py &&\
   python3 setup.py install
 
@@ -235,6 +288,12 @@ RUN cd ${HOME}/toolkit &&\
   ln -sf ${HOME}/toolkit/dotdotpwn/dotdotpwn.pl /usr/local/bin/dotdotpwn
 
 # ..............................................................................
+
+# fzf
+RUN cd ${HOME}/toolkit &&\
+  git clone --depth 1 https://github.com/junegunn/fzf.git &&\
+  cd fzf/ &&\
+  ./install
 
 # Sublist3r
 RUN cd ${HOME}/toolkit &&\
@@ -391,17 +450,19 @@ RUN cd ${HOME}/toolkit &&\
 
 # kiterunner
 # routes-large.json.tar.gz => routes-large.json
-# routes-large.kite.tar.gz => routes-large.kite 
+# routes-large.kite.tar.gz => routes-large.kite
 RUN cd ${HOME}/toolkit &&\
   git clone https://github.com/assetnote/kiterunner.git &&\
   cd kiterunner &&\
   make build &&\
   ln -s $(pwd)/dist/kr /usr/local/bin/kr &&\
-  wget https://wordlists-cdn.assetnote.io/rawdata/kiterunner/routes-large.json.tar.gz &&\
+  # wget https://wordlists-cdn.assetnote.io/rawdata/kiterunner/routes-large.json.tar.gz &&\
   wget https://wordlists-cdn.assetnote.io/data/kiterunner/routes-large.kite.tar.gz &&\
-  tar -xzf routes-large.json.tar.gz &&\ 
+  # tar -xzf routes-large.json.tar.gz &&\
+  # kr kb compile routes-large.json routes.kite &&\
+  # rm routes-large.json &&\
   tar -xzf routes-large.kite.tar.gz &&\
-  kr kb compile routes-large.json routes.kite
+  mv routes-large.kite routes.kite
 
 
 # # theHarvester (#TODO: always in ptf, see below)
@@ -504,9 +565,27 @@ RUN cd ${HOME}/toolkit &&\
 
 # ..............................................................................
 
+
+#############################
+# INIT CLEAN UP
+#############################
+
+RUN \
+  apt-get -y autoremove && \
+  apt-get clean && \
+  rm -rf \
+  /tmp/* \
+  /var/lib/apt/lists/* \
+  /var/tmp/*
+
+#############################
+# LAST STEPS
+#############################
+
 ENV SHELL /usr/bin/zsh
-# ENV SHELL /usr/bin/bash
 RUN mkdir -p /tmp/logging/
 RUN mkdir -p /tmp/docs/
+
+# ..............................................................................
 
 ENTRYPOINT script -f --timing=/tmp/logging/"log_`date +'%F_%T'`.time" /tmp/logging/"log_`date +'%F_%T'`.log" && /bin/zsh
