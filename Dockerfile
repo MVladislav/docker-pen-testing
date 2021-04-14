@@ -565,6 +565,26 @@ RUN cd ${HOME}/toolkit &&\
 
 # ..............................................................................
 
+# HellRaiser
+# RUN by `foreman s`
+# RUN \
+#   apt-get install -y --no-install-recommends \
+#   redis-server \
+#   nmap
+# RUN cd ${HOME}/toolkit &&\
+#   git clone https://github.com/blackhatethicalhacking/HellRaiser.git &&\
+#   cd HellRaiser &&\
+#   gem install foreman &&\
+#   bundle install --path vendor/bundle &&\
+#   bundle exec rake db:migrate
+
+# SSRFmap
+RUN cd ${HOME}/toolkit &&\
+  git clone https://github.com/swisskyrepo/SSRFmap &&\
+  cd SSRFmap &&\
+  pip3 install -r requirements.txt &&\
+  chmod +x ssrfmap.py &&\
+  ln -sf ${HOME}/toolkit/SSRFmap/ssrfmap.py /usr/local/bin/ssrfmap
 
 #############################
 # INIT CLEAN UP
@@ -579,8 +599,15 @@ RUN \
   /var/tmp/*
 
 #############################
+# ADD ALIASES
+#############################
+
+RUN alias myip='curl ifconfig.co/ && echo ""'
+
+#############################
 # LAST STEPS
 #############################
+
 
 ENV SHELL /usr/bin/zsh
 RUN mkdir -p /tmp/logging/

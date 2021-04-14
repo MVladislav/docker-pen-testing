@@ -10,7 +10,7 @@
     - `"$HOME/Pen_Test/docs/:/tmp/docs/"`
       > you can use this to transfer relevant files between docker runtime and host to save results from commands/services
 - replay log files
-  - `$scriptreplay $HOME/Pen_Test/log/<filename>.time $HOME/Pen_Test/log/<filename>.log`
+  - `$scriptreplay $HOME/Pen_Test/log/<filename>.time $HOME/Pen_Test/log/<filename>.log -m0`
 
 ### relevant folders
 
@@ -96,6 +96,22 @@ $find . -type f -name "*priv_tunnel*.ovpn" -exec bash -c 'nmcli connection impor
 
 $nmcli connection show
 $nmcli connection up <vpn connection name>
+```
+
+### VPN - OPENVPN
+
+- `$openvpn --config <file> --auth-user-pass pass.txt`
+
+#### add config to --config file
+
+```vpn
+# The following is added only in the config for Ubuntu 20.04
+dhcp-option DOMAIN 1.1.1.1
+script-security 2
+up /etc/openvpn/update-resolv-conf
+up-restart
+down /etc/openvpn/update-resolv-conf
+down-pre
 ```
 
 ## Info
